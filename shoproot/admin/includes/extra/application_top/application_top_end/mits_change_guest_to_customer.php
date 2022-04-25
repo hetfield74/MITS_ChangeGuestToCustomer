@@ -16,14 +16,17 @@ if (defined('FILENAME_CUSTOMERS') && basename($PHP_SELF) == FILENAME_CUSTOMERS) 
   $is_changed = $mits_change_to_customer_id = 0;
   if (isset($_GET['action']) && $_GET['action'] == 'mits_change_to_customer' && isset($_GET['cID']) && $_GET['cID'] != '') {
     $mits_change_to_customer_id = (int)$_GET['cID'];
-    $check_email_1 = xtc_db_query("SELECT customers_email_address FROM " . TABLE_CUSTOMERS . " WHERE customers_id = " . $mits_change_to_customer_id);
+    $check_email_1 = xtc_db_query("SELECT customers_email_address,
+                                          customers_firstname,
+                                          customers_lastname,
+                                          customers_gender,
+                                          customers_status,
+                                          customers_cid 
+                                     FROM " . TABLE_CUSTOMERS . " 
+                                    WHERE customers_id = " . $mits_change_to_customer_id);
     if (xtc_db_num_rows($check_email_1)) {
       $check_email_1 = xtc_db_fetch_array($check_email_1);
-      $check_email_2 = xtc_db_query("SELECT customers_email_address,
-                                            customers_firstname,
-                                            customers_lastname,
-                                            customers_gender,
-                                            customers_cid
+      $check_email_2 = xtc_db_query("SELECT customers_email_address
                                        FROM " . TABLE_CUSTOMERS . "
                                       WHERE customers_email_address = '" . xtc_db_input($check_email_1['customers_email_address']) . "'
                                         AND account_type = 0
@@ -46,6 +49,12 @@ if (defined('FILENAME_CUSTOMERS') && basename($PHP_SELF) == FILENAME_CUSTOMERS) 
           'customers_last_modified' => 'now()'
         );
         xtc_db_perform(TABLE_CUSTOMERS, $sql_data_update_array, 'update', "customers_id = " . $mits_change_to_customer_id);
+        $sql_data_status_array = array('customers_id' => $mits_change_to_customer_id,
+                                'new_value' => $customers_status,
+                                'old_value' => $check_email_1['customers_status'],
+                                'date_added' => 'now()',
+                                'customer_notified' => '0');
+        xtc_db_perform(TABLE_CUSTOMERS_STATUS_HISTORY, $sql_data_status_array);
         $is_changed = 1;
 
         if (isset($_GET['send_password_mail']) && $_GET['send_password_mail'] == 'yes') {
