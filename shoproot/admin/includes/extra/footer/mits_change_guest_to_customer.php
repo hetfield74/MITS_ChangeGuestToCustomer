@@ -13,7 +13,7 @@
  */
 
 if (defined('FILENAME_CUSTOMERS') && basename($PHP_SELF) == FILENAME_CUSTOMERS) {
-  if (is_object($cInfo) && isset($cInfo->customers_id) && !empty($cInfo->customers_id)) {
+  if (isset($cInfo) && is_object($cInfo) && isset($cInfo->customers_id) && !empty($cInfo->customers_id)) {
     $MITS_GuestToCustomer = '';
     $MITS_GuestToCustomerButton = ($is_changed == 1 && $cInfo->customers_id == $mits_change_to_customer_id) ? false : true;
     if ($cInfo->account_type == 1 && $MITS_GuestToCustomerButton !== false) {
